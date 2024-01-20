@@ -46,7 +46,7 @@ def make_pvalues_table(necessary_keys, vrpvariants, instance_range):
             file_paths_ors = []
             add_files_to_set(
                 "C:\\Users\\lucas\\Documents\\masterproef2023_2024\\metavrp-toolkit\\cli\\etc\\demoproblems\\analysisResultsJSON\\" + vrpvariant + "\\",
-                file_paths_gh, "SLV", instance_range)
+                file_paths_gh, "GH", instance_range)
             add_files_to_set(
                 "C:\\Users\\lucas\\Documents\\masterproef2023_2024\\metavrp-toolkit\\cli\\etc\\demoproblems\\analysisResultsJSON\\" + vrpvariant + "\\",
                 file_paths_ors, "ORS", instance_range)
@@ -81,12 +81,12 @@ def create_pvalues_table(pvalues_small, pvalues_large, vrpvariants, names, insta
         table = ax.table(cellText=table_data, cellLoc="center", colLabels=col_labels, loc='center', cellColours=colour_data)
         ax.axis('off')
         instance_range_str = f"Instances Range: {instance_range[0]}-{instance_range[1]}"
-        ax.set_title(f"P-values Openrouteservice vs Solvice: Flanders\n{instance_range_str}")
+        ax.set_title(f"P-values GraphHopper vs Openrouteservice: Flanders\n{instance_range_str}")
         table.auto_set_column_width([0])
         table.auto_set_font_size(False)
         table.set_fontsize(11)
 
-    figname = "ORSvsSLV/ORSvsSLV_shipments_Vlaanderen"
+    figname = "GHvsORS/GHvsORS_shipments_Vlaanderen"
     plt.savefig(figname)
     plt.show()
 
@@ -117,7 +117,8 @@ list_keys = [['WorkingShiftAnalysisResult', 'meanworkingShift'],
              ['CargoAnalysisResult', 'meanLoad'],
              ['CargoAnalysisResult', 'meanLoadVolume']]
 
-variants = ["Capacity", "Capacity_TW", "Open", "PDP", "PDP_TW", "MultiDepot", "SameAddresses"]
+#variants = ["Priority", "Shift", "Skills", "Skills_TW", "TW"]
+variants = ["Capacity", "Capacity_TW", "MultiDepot", "Open", "PDP", "PDP_TW", "Sameaddresses"]
 
 pvaluessmall, names = make_pvalues_table(list_keys, variants, small_instance_range)
 pvalueslarge, names = make_pvalues_table(list_keys, variants, large_instance_range)
