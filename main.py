@@ -8,7 +8,7 @@ from scipy.stats import ranksums, wilcoxon, mannwhitneyu, ttest_ind
 
 def add_files_to_set(path, file_paths, enginename, instance_range):
     for file in os.listdir(path):
-        if os.path.isfile(os.path.join(path, file)) and enginename in file and "Brussel" not in file:
+        if os.path.isfile(os.path.join(path, file)) and enginename in file and "Brussel" in file:
             instance_size = int(file.split("_")[3])
             if instance_range[0] <= instance_size <= instance_range[1]:
                 file_path = os.path.join(path, file)
@@ -46,16 +46,16 @@ def make_pvalues_table(necessary_keys, vrpvariants, instance_range):
             file_paths_ors = []
             add_files_to_set(
                 "C:\\Users\\lucas\\Documents\\masterproef2023_2024\\metavrp-toolkit\\cli\\etc\\demoproblems\\analysisResultsJSON\\" + vrpvariant + "\\",
-                file_paths_gh, "GH", instance_range)
+                file_paths_gh, "ORS", instance_range)
             add_files_to_set(
                 "C:\\Users\\lucas\\Documents\\masterproef2023_2024\\metavrp-toolkit\\cli\\etc\\demoproblems\\analysisResultsJSON\\" + vrpvariant + "\\",
-                file_paths_ors, "ORS", instance_range)
+                file_paths_ors, "SLV", instance_range)
 
             values_gh = [calculate_mean(read_json_file(file_gh, keys)) for file_gh in file_paths_gh]
             values_ors = [calculate_mean(read_json_file(file_ors, keys)) for file_ors in file_paths_ors]
 
             if values_ors.__contains__(-1):
-                pvalue = 2.0
+                pvalue = 1.0
             else: _, pvalue = ranksums(values_gh, values_ors)
             pvalues_row.append(pvalue)
         names.append(keys[1])
@@ -81,12 +81,12 @@ def create_pvalues_table(pvalues_small, pvalues_large, vrpvariants, names, insta
         table = ax.table(cellText=table_data, cellLoc="center", colLabels=col_labels, loc='center', cellColours=colour_data)
         ax.axis('off')
         instance_range_str = f"Instances Range: {instance_range[0]}-{instance_range[1]}"
-        ax.set_title(f"P-values GraphHopper vs Openrouteservice: Flanders\n{instance_range_str}")
+        ax.set_title(f"P-values Openrouteservice vs Solvice: Brussels\n{instance_range_str}")
         table.auto_set_column_width([0])
         table.auto_set_font_size(False)
         table.set_fontsize(11)
 
-    figname = "GHvsORS/GHvsORS_shipments_Vlaanderen"
+    figname = "ORSvsSLV/ORSvsSLV_shipments_Brussel"
     plt.savefig(figname)
     plt.show()
 
