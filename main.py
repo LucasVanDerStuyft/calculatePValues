@@ -46,10 +46,10 @@ def make_pvalues_table(necessary_keys, vrpvariants, instance_range):
             file_paths_ors = []
             add_files_to_set(
                 "C:\\Users\\lucas\\Documents\\masterproef2023_2024\\metavrp-toolkit\\cli\\etc\\demoproblems\\analysisResultsJSON\\" + vrpvariant + "\\",
-                file_paths_gh, "SLV", instance_range)
+                file_paths_gh, "ORS", instance_range)
             add_files_to_set(
                 "C:\\Users\\lucas\\Documents\\masterproef2023_2024\\metavrp-toolkit\\cli\\etc\\demoproblems\\analysisResultsJSON\\" + vrpvariant + "\\",
-                file_paths_ors, "ORS", instance_range)
+                file_paths_ors, "GH", instance_range)
 
             values_gh = [calculate_param(read_json_file(file_gh, keys), vrpvariant, keys) for file_gh in file_paths_gh]
             values_ors = [calculate_param(read_json_file(file_ors, keys), vrpvariant, keys) for file_ors in file_paths_ors]
@@ -85,12 +85,12 @@ def create_pvalues_table(pvalues_small, pvalues_large, vrpvariants, names, insta
                          cellColours=colour_data)
         ax.axis('off')
         instance_range_str = f"Instances Range: {instance_range[0]}-{instance_range[1]}"
-        ax.set_title(f"P-values GraphHopper vs Solvice: Brussels\n{instance_range_str}")
+        ax.set_title(f"P-values GraphHopper vs Openrouteservice: Brussels\n{instance_range_str}")
         table.auto_set_column_width([0])
         table.auto_set_font_size(False)
         table.set_fontsize(11)
 
-    figname = "ORSvsSLV/ORSvsSLV_shipments_Brussel.pdf"
+    figname = "GHvsORS/GHvsORS_shipments_Brussel.png"
     #figname="test"
     plt.savefig(figname)
     plt.show()
