@@ -3,7 +3,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import ranksums, wilcoxon, mannwhitneyu, ttest_ind
+from scipy.stats import ranksums
 
 
 def add_files_to_set(path, file_paths, enginename, instance_range):
@@ -27,8 +27,8 @@ def read_json_file(file_path, keys):
         return get_nested_value(data, keys)
 
 
-def calculate_mean(param):
-    if param is None:
+def calculate_param(param, variant, key):
+    if (variant == "PDP" or variant == "PDP_TW") and key[0] == "CargoAnalysisResult":
         return -1
     if isinstance(param, dict):
         return np.mean(list(param.values()))
@@ -46,17 +46,18 @@ def make_pvalues_table(necessary_keys, vrpvariants, instance_range):
             file_paths_ors = []
             add_files_to_set(
                 "C:\\Users\\lucas\\Documents\\masterproef2023_2024\\metavrp-toolkit\\cli\\etc\\demoproblems\\analysisResultsJSON\\" + vrpvariant + "\\",
-                file_paths_gh, "ORS", instance_range)
+                file_paths_gh, "SLV", instance_range)
             add_files_to_set(
                 "C:\\Users\\lucas\\Documents\\masterproef2023_2024\\metavrp-toolkit\\cli\\etc\\demoproblems\\analysisResultsJSON\\" + vrpvariant + "\\",
-                file_paths_ors, "SLV", instance_range)
+                file_paths_ors, "ORS", instance_range)
 
-            values_gh = [calculate_mean(read_json_file(file_gh, keys)) for file_gh in file_paths_gh]
-            values_ors = [calculate_mean(read_json_file(file_ors, keys)) for file_ors in file_paths_ors]
+            values_gh = [calculate_param(read_json_file(file_gh, keys), vrpvariant, keys) for file_gh in file_paths_gh]
+            values_ors = [calculate_param(read_json_file(file_ors, keys), vrpvariant, keys) for file_ors in file_paths_ors]
 
             if values_ors.__contains__(-1):
-                pvalue = 1.0
-            else: _, pvalue = ranksums(values_gh, values_ors)
+                pvalue = 2.0
+            else:
+                _, pvalue = ranksums(values_gh, values_ors)
             pvalues_row.append(pvalue)
         names.append(keys[1])
         pvalues.append(pvalues_row)
@@ -64,12 +65,11 @@ def make_pvalues_table(necessary_keys, vrpvariants, instance_range):
 
 
 def create_pvalues_table(pvalues_small, pvalues_large, vrpvariants, names, instance_ranges):
-    fig, axes = plt.subplots(2, 1, figsize=(10, 12))
+    fig, axes = plt.subplots(2, 1, figsize=(13, 12))
     for ax, pvalues, instance_range in zip(axes, [pvalues_small, pvalues_large], instance_ranges):
         transposed_pvalues = list(map(list, zip(*pvalues)))
         rounded_pvalues = [[round(val, 4) for val in row] for row in transposed_pvalues]
 
-        table_data = list(zip(names, *rounded_pvalues))
         col_labels = vrpvariants.copy()
         col_labels.insert(0, "Metric name")
 
@@ -77,16 +77,21 @@ def create_pvalues_table(pvalues_small, pvalues_large, vrpvariants, names, insta
         cell_colors = [['green' if value < threshold else 'white' for value in row] for row in rounded_pvalues]
         white_colors = ['white'] * len(cell_colors[0])
         colour_data = list(zip(white_colors, *cell_colors))
+        rounded_pvalues = [[round(val, 4) if val != 2 else '' for val in row] for row in transposed_pvalues]
+        table_data = list(zip(names, *rounded_pvalues))
+
         # style for the table
-        table = ax.table(cellText=table_data, cellLoc="center", colLabels=col_labels, loc='center', cellColours=colour_data)
+        table = ax.table(cellText=table_data, cellLoc="center", colLabels=col_labels, loc='center',
+                         cellColours=colour_data)
         ax.axis('off')
         instance_range_str = f"Instances Range: {instance_range[0]}-{instance_range[1]}"
-        ax.set_title(f"P-values Openrouteservice vs Solvice: Brussels\n{instance_range_str}")
+        ax.set_title(f"P-values GraphHopper vs Solvice: Brussels\n{instance_range_str}")
         table.auto_set_column_width([0])
         table.auto_set_font_size(False)
         table.set_fontsize(11)
 
-    figname = "ORSvsSLV/ORSvsSLV_shipments_Brussel"
+    figname = "ORSvsSLV/ORSvsSLV_shipments_Brussel.pdf"
+    #figname="test"
     plt.savefig(figname)
     plt.show()
 
@@ -125,6 +130,5 @@ pvalueslarge, names = make_pvalues_table(list_keys, variants, large_instance_ran
 
 array_small = np.array(pvaluessmall)
 array_large = np.array(pvalueslarge)
-
 
 create_pvalues_table(array_small, array_large, variants, names, instance_ranges)
